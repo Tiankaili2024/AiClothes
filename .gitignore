@@ -1,0 +1,17 @@
+﻿# Java
+backend/target/
+backend/*.log
+backend/.mvn/
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+# MySQL
+mysql-data/
+# IDE
+.idea/
+*.iml
+.vscode/
+# OS
+.DS_Store
+Thumbs.db
