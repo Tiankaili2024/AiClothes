@@ -1,0 +1,1 @@
+import{r as e}from"./request-04A_lxVy.js";function n(t){return e.post("/outfit/generate",t)}function u(t,r){return e.get("/outfit/records",{params:{page:t,size:r}})}function a(t){return e.delete("/outfit/delete/"+t)}function c(){return e.delete("/outfit/clear")}function f(){return e.get("/outfit/today-count")}export{n as a,u as b,c,a as d,f as g};

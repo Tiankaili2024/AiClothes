@@ -3,7 +3,60 @@
     <el-card shadow="never">
       <template #header><span class="card-title">个人穿搭档案</span></template>
       <el-form :model="form" label-width="100px">
-        <el-row :gutter="20">
+        
+        <!-- full body photo upload -->
+        <el-form-item label="全身照">
+          <div class="fullbody-upload">
+            <div class="fullbody-preview" v-if="fullBodyUrl">
+              <el-image
+                :src="fullBodyUrl"
+                fit="contain"
+                class="fullbody-thumb"
+                :preview-src-list="[fullBodyUrl]"
+                preview-teleported
+                hide-on-click-modal
+              />
+              <div class="fullbody-hover-preview">
+                <el-image :src="fullBodyUrl" fit="contain" class="fullbody-large" />
+              </div>
+              <div class="fullbody-actions-overlay">
+                <el-upload
+                  :action="fullBodyUploadUrl"
+                  :headers="uploadHeaders"
+                  :show-file-list="false"
+                  :on-success="onFullBodySuccess"
+                  :on-error="onUploadError"
+                  :before-upload="beforeImageUpload"
+                  accept="image/jpeg,image/png,image/gif"
+                >
+                  <el-button size="small" circle type="primary" title="更换">
+                    <el-icon><Edit /></el-icon>
+                  </el-button>
+                </el-upload>
+                <el-button size="small" circle type="danger" title="删除" @click="removeFullBody">
+                  <el-icon><Delete /></el-icon>
+                </el-button>
+              </div>
+            </div>
+            <div v-else class="fullbody-empty">
+              <el-upload
+                :action="fullBodyUploadUrl"
+                :headers="uploadHeaders"
+                :show-file-list="false"
+                :on-success="onFullBodySuccess"
+                :on-error="onUploadError"
+                :before-upload="beforeImageUpload"
+                accept="image/jpeg,image/png,image/gif"
+              >
+                <el-button type="primary" plain>
+                  <el-icon><Upload /></el-icon> 上传全身照
+                </el-button>
+              </el-upload>
+              <span class="fullbody-hint">用于AI穿搭效果图参考，建议上传清晰的全身站立照片</span>
+            </div>
+          </div>
+        </el-form-item>
+<el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="昵称"><el-input v-model="form.nickname" /></el-form-item>
           </el-col>
@@ -79,11 +132,19 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserInfo } from '../../api/user'
 import { updateProfile } from '../../api/user'
+import { getToken } from '../../utils/auth'
 import { setUser } from '../../utils/auth'
 const saving = ref(false)
 const form = reactive({ nickname: '', gender: '', height: 165, weight: 60, bodyType: '', skinTone: '', city: '', fashionBan: '' })
 const stylePrefs = ref([])
 const colorPrefs = ref([])
+const fullBodyUrl = ref('')
+const baseUrl = ''
+const uploadUrl = baseUrl + '/api/user/avatar/upload'
+const fullBodyUploadUrl = baseUrl + '/api/user/fullbody/upload'
+const uploadHeaders = {
+  Authorization: 'Bearer ' + getToken()
+}
 watch(stylePrefs, val => { form.stylePref = val.join(',') })
 watch(colorPrefs, val => { form.colorPref = val.join(',') })
 onMounted(async () => {
@@ -99,11 +160,38 @@ onMounted(async () => {
       form.skinTone = u.skinTone || ''
       form.city = u.city || ''
       form.fashionBan = u.fashionBan || ''
+      fullBodyUrl.value = u.fullBodyPhoto || ''
       stylePrefs.value = u.stylePref ? u.stylePref.split(',') : []
       colorPrefs.value = u.colorPref ? u.colorPref.split(',') : []
     }
   } catch(e) {}
 })
+
+function onUploadError() {
+  ElMessage.error('上传失败，请重试')
+}
+
+function onFullBodySuccess(response) {
+  if (response.code === 200) {
+    fullBodyUrl.value = response.data
+    ElMessage.success('全身照上传成功')
+  } else {
+    ElMessage.error(response.msg || '上传失败')
+  }
+}
+
+function removeFullBody() {
+  fullBodyUrl.value = ''
+}
+
+function beforeImageUpload(file) {
+  const isImage = ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)
+  const isLt10M = file.size / 1024 / 1024 < 10
+  if (!isImage) { ElMessage.error('只能上传 JPG/PNG/GIF 格式的图片'); return false }
+  if (!isLt10M) { ElMessage.error('全身照图片不能超过 10MB'); return false }
+  return true
+}
+
 async function saveProfile() {
   saving.value = true
   try {
@@ -119,5 +207,33 @@ async function saveProfile() {
 </script>
 <style scoped>
 .profile-container { max-width: 900px; margin: 0 auto; }
+.fullbody-upload { width: 100%; }
+.fullbody-preview {
+  position: relative; width: 120px; height: 160px;
+  border-radius: 8px; overflow: hidden;
+  border: 1px solid #e4e7ed; cursor: pointer;
+}
+.fullbody-thumb { width: 100%; height: 100%; object-fit: cover; }
+.fullbody-hover-preview {
+  display: none;
+  position: absolute; left: 130px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 100; width: 300px; height: 400px;
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  background: #fff; padding: 4px;
+}
+.fullbody-preview:hover .fullbody-hover-preview { display: block; }
+.fullbody-large { width: 100%; height: 100%; object-fit: contain; }
+.fullbody-actions-overlay {
+  position: absolute; bottom: 4px; right: 4px;
+  display: flex; gap: 4px;
+  opacity: 0; transition: opacity 0.2s;
+}
+.fullbody-preview:hover .fullbody-actions-overlay { opacity: 1; }
+.fullbody-empty { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.fullbody-hint { font-size: 12px; color: #909399; }
+
 .card-title { font-size: 18px; font-weight: bold; }
 </style>
+

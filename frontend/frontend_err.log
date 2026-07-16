@@ -1,0 +1,57 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+[2m21:35:38[22m [31m[1m[vite][22m[39m [31mInternal server error: [vue/compiler-sfc] Unexpected token (128:0)
+
+D:/pc/clothes/frontend/src/views/outfit/OutfitChatView.vue
+316|    generating.value = false
+317|    await nextTick()
+318|    scrollToBottom()
+   |                      ^
+319|  }
+   |  ^
+320|  [39m
+  Plugin: [35mvite:vue[39m
+  File: [36mD:/pc/clothes/frontend/src/views/outfit/OutfitChatView.vue[39m:128:0
+[33m  84 |        </el-col>
+  85 |  
+  86 |        <!-- ====== 右侧：穿搭效果 + 方案解析 ====== -->
+     |                              ^
+  87 |        <el-col :span="10">
+  88 |          <el-card shadow="never" class="result-card">[39m
+      at constructor (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:365:19)
+      at Parser.raise (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:6616:19)
+      at Parser.unexpected (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:6636:16)
+      at Parser.parseExprAtom (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11459:22)
+      at Parser.parseExprSubscripts (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11098:23)
+      at Parser.parseUpdate (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11083:21)
+      at Parser.parseMaybeUnary (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11063:23)
+      at Parser.parseMaybeUnaryOrPrivate (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:10916:61)
+      at Parser.parseExprOps (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:10921:23)
+      at Parser.parseMaybeConditional (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:10898:23)
+[2m21:35:38[22m [31m[1m[vite][22m[39m [31mInternal server error: [vue/compiler-sfc] Unexpected token (128:0)
+
+D:/pc/clothes/frontend/src/views/outfit/OutfitChatView.vue
+316|    generating.value = false
+317|    await nextTick()
+318|    scrollToBottom()
+   |                      ^
+319|  }
+   |  ^
+320|  [39m
+  Plugin: [35mvite:vue[39m
+  File: [36mD:/pc/clothes/frontend/src/views/outfit/OutfitChatView.vue[39m:128:0
+[33m  84 |        </el-col>
+  85 |  
+  86 |        <!-- ====== 右侧：穿搭效果 + 方案解析 ====== -->
+     |                              ^
+  87 |        <el-col :span="10">
+  88 |          <el-card shadow="never" class="result-card">[39m
+      at constructor (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:365:19)
+      at Parser.raise (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:6616:19)
+      at Parser.unexpected (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:6636:16)
+      at Parser.parseExprAtom (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11459:22)
+      at Parser.parseExprSubscripts (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11098:23)
+      at Parser.parseUpdate (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11083:21)
+      at Parser.parseMaybeUnary (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:11063:23)
+      at Parser.parseMaybeUnaryOrPrivate (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:10916:61)
+      at Parser.parseExprOps (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:10921:23)
+      at Parser.parseMaybeConditional (D:\pc\clothes\frontend\node_modules\.pnpm\@babel+parser@7.29.7\node_modules\@babel\parser\lib\index.js:10898:23)

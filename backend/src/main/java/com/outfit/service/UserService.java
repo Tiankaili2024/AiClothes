@@ -14,6 +14,7 @@ public interface UserService {
     void updateProfile(Long userId, UserProfileDTO dto);
     void updatePassword(Long userId, String oldPwd, String newPwd);
     void updateAvatar(Long userId, String avatar);
+    void updateFullBodyPhoto(Long userId, String fullBodyPhoto);
     Page<User> listUsers(int page, int size, String keyword);
     void toggleUserStatus(Long userId, Integer status);
     void forgotPassword(com.outfit.dto.ForgotPasswordDTO dto);

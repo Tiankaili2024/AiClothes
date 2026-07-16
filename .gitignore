@@ -15,3 +15,9 @@ mysql-data/
 # OS
 .DS_Store
 Thumbs.db
+# pnpm全局缓存
+.pnpm_home/
+# 常规前端依赖也补充屏蔽
+node_modules/
+.pnp
+.pnp.js

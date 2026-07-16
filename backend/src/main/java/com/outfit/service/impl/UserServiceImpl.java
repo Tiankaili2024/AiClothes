@@ -77,6 +77,7 @@ public class UserServiceImpl implements UserService {
         user.setColorPref(dto.getColorPref());
         user.setCity(dto.getCity());
         user.setFashionBan(dto.getFashionBan());
+        user.setFullBodyPhoto(dto.getFullBodyPhoto());
         user.setSecurityQuestion(dto.getSecurityQuestion());
         user.setSecurityAnswer(dto.getSecurityAnswer());
         userMapper.updateById(user);
@@ -139,6 +140,14 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setId(userId);
         user.setStatus(status);
+        userMapper.updateById(user);
+    }
+
+    @Override
+    public void updateFullBodyPhoto(Long userId, String fullBodyPhoto) {
+        User user = new User();
+        user.setId(userId);
+        user.setFullBodyPhoto(fullBodyPhoto);
         userMapper.updateById(user);
     }
 }

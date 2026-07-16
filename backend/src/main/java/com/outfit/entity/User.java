@@ -3,10 +3,10 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 @Data
-@TableName("user")
+@TableName("app_user")
 public class User {
     @TableId(type = IdType.AUTO) private Long id;
-    private String username; private String password; private String nickname; private String avatar;
+    private String username; private String password; private String nickname; private String avatar; private String fullBodyPhoto;
     private String gender; private String height; private String weight;
     private String bodyType; private String skinTone;
     private String stylePref; private String colorPref; private String fashionBan;

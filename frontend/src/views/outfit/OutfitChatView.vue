@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="outfit-container">
     <el-row :gutter="20">
       <!-- 左侧：对话区 -->
@@ -26,7 +26,7 @@
                   <el-button size="small" text type="primary" @click="addFav(msg.recordId)">
                     <el-icon><Star /></el-icon> {{ msg.fav ? '已收藏' : '收藏' }}
                   </el-button>
-                  <el-button size="small" text type="primary" @click="downloadImage(msg.imageUrl)">
+                  <el-button size="small" text type="primary" @click="previewImage(msg.imageUrl)">
                     <el-icon><Download /></el-icon> 下载
                   </el-button>
                   <el-button size="small" text type="warning" @click="regenerate(msg)">
@@ -122,7 +122,7 @@
               <div class="outfit-image-wrap">
                 <el-image
                   v-if="currentPlan.prompt"
-                  :src="'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(currentPlan.scheme_name || '穿搭效果')"
+                  :src="currentPlan.image_url || 'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(currentPlan.scheme_name || '穿搭效果')"
                   fit="contain"
                   class="outfit-image"
                 />
@@ -211,8 +211,12 @@ const weatherLoading = ref(false)
 
 const DEFAULT_CITY = '北京'
 
-const currentPlan = computed(() => {
-  return schemes.value[activeScheme.value] || {}
+const currentPlan = computed(() => schemes.value[activeScheme.value] || {})
+const imageSrc = computed(() => {
+  const url = currentPlan.value.image_url;
+  if (url) return url
+  const name = currentPlan.value.scheme_name || currentPlan.value.style || '穿搭效果';
+  return 'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(name)
 })
 
 const templates = [
@@ -271,42 +275,43 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
-  try {
-    const res = await generateOutfit({
-      userInput: inputText,
-      city: cityInput.value || DEFAULT_CITY
-    })
-    if (res.code === 200 && res.data) {
-      const record = res.data
-      // 解析 parsedParams：可能是 JSON 数组或对象
-      let plans = []
-      try {
-        const parsed = JSON.parse(record.parsedParams || '[]')
-        plans = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : [])
-      } catch (e) {
-        plans = []
-      }
-      // 确保至少有一条
-      if (!plans.length) {
-        plans = [{ scheme_name: '推荐搭配', style: '通勤', color: '浅色系', top: '—', bottom: '—', shoes: '—', accessory: '—' }]
-      }
-      schemes.value = plans
-      activeScheme.value = 0
-
-      // 构造聊天气泡消息
-      const planNames = plans.map((p, i) => `方案${i + 1}: ${p.scheme_name || p.style || ''}`).join('、')
-      messages.value.push({
-        role: 'ai',
-        content: `已为您生成 ${plans.length} 套穿搭方案 🎉\n${planNames}\n点击右侧查看详细搭配解析`,
-        imageUrl: record.imageUrl || '',
-        recordId: record.id,
-        params: plans,
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await generateOutfit({
+        userInput: inputText,
+        city: cityInput.value || DEFAULT_CITY
       })
-      await checkFavStatus(record.id)
-      await loadTodayCount()
+
+      if (res.code === 200 && res.data) {
+        const record = res.data
+        let plans = []
+        try {
+          const parsed = JSON.parse(record.parsedParams || '[]')
+          plans = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : [])
+        } catch (e) { plans = [] }
+        if (!plans.length) {
+          plans = [{ scheme_name: '推荐搭配', style: '通勤', color: '浅色系', top: '—', bottom: '—', shoes: '—', accessory: '—' }]
+        }
+        if (record.imageUrl && plans.length > 0) plans[0].image_url = record.imageUrl
+        schemes.value = plans
+        activeScheme.value = 0
+
+        const planNames = plans.map((p, i) => '方案' + (i + 1) + ': ' + (p.scheme_name || p.style || '')).join('、')
+        messages.value.push({
+          role: 'ai',
+          content: '已为您生成 ' + plans.length + ' 套穿搭方案 \n' + planNames + '\n点击右侧查看详细搭配解析',
+          imageUrl: record.imageUrl || '',
+          recordId: record.id,
+          params: plans,
+        })
+        await checkFavStatus(record.id)
+        await loadTodayCount()
+        return
+      }
+    } catch (e) {
+      if (attempt < 2) await new Promise(r => setTimeout(r, 2000))
+      else messages.value.push({ role: 'ai', content: '生成失败，请稍后重试' })
     }
-  } catch (e) {
-    messages.value.push({ role: 'ai', content: '生成失败，请稍后重试' })
   }
   generating.value = false
   await nextTick()

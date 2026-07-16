@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class UserProfileDTO {
     private String nickname;
-    private String avatar;
+    private String avatar; private String fullBodyPhoto;
     private String gender;
     private String height;
     private String weight;

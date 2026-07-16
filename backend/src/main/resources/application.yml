@@ -1,14 +1,21 @@
-server:
+﻿server:
   port: 8080
-
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   datasource:
-    url: jdbc:mysql://localhost:3306/ai_outfit?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
-    username: root
-    password: "123456"
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:file:./data/ai_outfit;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -16,7 +23,6 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
-
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
@@ -27,11 +33,9 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
-
 jwt:
   secret: ai-outfit-system-secret-key-2024
   expire: 86400000
-
 ai:
   model:
     api-url: https://api.coze.cn/open_api/v2/chat
@@ -47,3 +51,9 @@ ai:
   domain-rules-enabled: true
   retry-times: 2
   negative-prompt: true
+app:
+  upload-dir: uploads/avatar
+coze:
+  api-url: https://api.coze.cn/v1/workflow/run
+  api-key: pat_KdydxOzKPawn5WIZOMQ0PIwhLLS7AYoqUIm8h5q5XWJVCcoC5CY79FdjJC6b6KZ7
+  workflow-id: 7662947200855244827
