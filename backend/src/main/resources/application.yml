@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 8080
 
 spring:
@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/ai_outfit?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
-    password:
+    password: "123456"
     driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -35,16 +35,15 @@ jwt:
 ai:
   model:
     api-url: https://api.coze.cn/open_api/v2/chat
-    api-key: ''''
+    api-key: ''
   image:
-    api-url: ''''
-    api-key: ''''
+    api-url: ''
+    api-key: ''
   weather:
     api-url: https://restapi.amap.com/v3/weather/weatherInfo
-    api-key: ''''
+    api-key: '57ea4f63c8e4e21b6c20e41f2f9c9f1f'
   daily-limit: 10
   session-expire: 30
   domain-rules-enabled: true
   retry-times: 2
   negative-prompt: true
-
