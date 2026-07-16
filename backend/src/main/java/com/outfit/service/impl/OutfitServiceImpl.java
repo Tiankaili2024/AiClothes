@@ -1,4 +1,4 @@
-﻿package com.outfit.service.impl;
+package com.outfit.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,7 +27,6 @@ public class OutfitServiceImpl implements OutfitService {
 
     private static final String DEFAULT_CITY = "北京";
 
-    // In-memory rate limiting (replaces Redis)
     private final Map<String, Integer> dailyLimitMap = new ConcurrentHashMap<>();
 
     @Override
@@ -42,7 +41,6 @@ public class OutfitServiceImpl implements OutfitService {
         User user = userMapper.selectById(userId);
         if (user == null) throw new RuntimeException("用户不存在");
 
-        // 城市优先级：DTO传入 > 用户档案城市 > 默认城市"北京"
         String city = (dto.getCity() != null && !dto.getCity().isEmpty())
                 ? dto.getCity()
                 : (user.getCity() != null && !user.getCity().isEmpty()
@@ -52,8 +50,10 @@ public class OutfitServiceImpl implements OutfitService {
         Map<String, Object> weather = weatherService.getWeather(city);
         String weatherInfo = (String) weather.get("weather");
         String temperature = (String) weather.get("temperature");
+        String season = (String) weather.getOrDefault("season", "春季");
+        String regionType = (String) weather.getOrDefault("regionType", "北方");
 
-        String jsonResult = aiService.generateOutfitPlan(user, dto.getUserInput(), weatherInfo, temperature, city, null);
+        String jsonResult = aiService.generateOutfitPlan(user, dto.getUserInput(), weatherInfo, temperature, city, season, regionType, null);
 
         String sessionId = java.util.UUID.randomUUID().toString().substring(0,8);
         OutfitRecord firstRecord = null;

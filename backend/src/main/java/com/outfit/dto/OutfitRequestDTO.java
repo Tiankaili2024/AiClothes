@@ -1,4 +1,4 @@
-﻿package com.outfit.dto;
+package com.outfit.dto;
 
 import lombok.Data;
 
