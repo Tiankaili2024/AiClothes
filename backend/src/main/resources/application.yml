@@ -55,5 +55,5 @@ app:
   upload-dir: uploads/avatar
 coze:
   api-url: https://api.coze.cn/v1/workflow/run
-  api-key: pat_KdydxOzKPawn5WIZOMQ0PIwhLLS7AYoqUIm8h5q5XWJVCcoC5CY79FdjJC6b6KZ7
-  workflow-id: 7662947200855244827
+  api-key: pat_bEv2FuEN9pauUFd1KepdjwaENvDKw0EGwju9bXGaA0UIGJ26xc1GEZa4P5Q1JJKq
+  workflow-id: 7657770859754536970

@@ -20,7 +20,11 @@
                 <div class="msg-bubble">{{ msg.content }}</div>
                 <div v-if="msg.imageUrl" class="msg-image">
                   <el-image :src="msg.imageUrl" fit="contain" style="width:100%;max-height:400px;border-radius:8px"
-                    @click="previewImage(msg.imageUrl)" />
+                    @click="previewImage(msg.imageUrl)">
+                    <template #error>
+                      <div style="padding:20px;text-align:center;color:#909399">图片加载中...</div>
+                    </template>
+                  </el-image>
                 </div>
                 <div v-if="msg.recordId" class="msg-actions">
                   <el-button size="small" text type="primary" @click="addFav(msg.recordId)">
@@ -83,12 +87,17 @@
         </el-card>
       </el-col>
 
-      <!-- ====== 右侧：穿搭效果 + 方案解析 ====== -->
+      <!-- 右侧：穿搭效果 + 方案解析 -->
       <el-col :span="10">
         <el-card shadow="never" class="result-card">
           <template #header>
-            <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
               <span class="card-title"><el-icon><Picture /></el-icon> 穿搭效果</span>
+              <div v-if="currentPlan.image_url" style="margin-top:4px">
+                <el-link :href="currentPlan.image_url" target="_blank" type="primary" :underline="false" style="font-size:11px">
+                  <el-icon><Link /></el-icon> {{ currentPlan.image_url.substring(0,50) }}...
+                </el-link>
+              </div>
             </div>
           </template>
 
@@ -122,13 +131,25 @@
               <div class="outfit-image-wrap">
                 <el-image
                   v-if="currentPlan.prompt"
-                  :src="currentPlan.image_url || 'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(currentPlan.scheme_name || '穿搭效果')"
+                  :src="currentPlan.image_url || '/api/placeholder/outfit?seed=' + Date.now()"
                   fit="contain"
                   class="outfit-image"
-                />
+                >
+                  <template #error>
+                    <div class="outfit-image-placeholder">
+                      <el-icon :size="36"><Picture /></el-icon>
+                      <span>图片加载失败</span>
+                    </div>
+                  </template>
+                </el-image>
                 <div v-else class="outfit-image-placeholder">
                   <el-icon :size="36"><Picture /></el-icon>
                   <span>穿搭效果图</span>
+                </div>
+                <div v-if="currentPlan.image_url" style="margin-top:6px;text-align:center">
+                  <el-link :href="currentPlan.image_url" target="_blank" type="primary" :underline="false" style="font-size:12px">
+                    查看原图
+                  </el-link>
                 </div>
               </div>
 
@@ -212,20 +233,14 @@ const weatherLoading = ref(false)
 const DEFAULT_CITY = '北京'
 
 const currentPlan = computed(() => schemes.value[activeScheme.value] || {})
-const imageSrc = computed(() => {
-  const url = currentPlan.value.image_url;
-  if (url) return url
-  const name = currentPlan.value.scheme_name || currentPlan.value.style || '穿搭效果';
-  return 'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(name)
-})
 
 const templates = [
   { label: '通勤穿搭', icon: 'Briefcase', text: '上班通勤穿搭，得体大方' },
   { label: '约会穿搭', icon: 'Cherry', text: '约会穿搭，温柔显气质' },
   { label: '出游穿搭', icon: 'Sunny', text: '周末出游穿搭，舒适好看' },
   { label: '运动穿搭', icon: 'TrendCharts', text: '运动健身穿搭，活力休闲' },
-  { label: '居家穿搭', icon: 'HomeFilled', text: '居家休闲穿搭，舒适为主' },
-  { label: '礼服穿搭', icon: 'Trophy', text: '正式场合礼服穿搭，优雅高级' },
+  { label: '居家穿搭', icon: 'HomeFilled', text: '居家休闲穿搭，舒适为先' },
+  { label: '礼服穿搭', icon: 'Trophy', text: '正式场礼服穿搭，优雅高级' },
 ]
 
 onMounted(async () => {
@@ -275,13 +290,10 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
+  let lastError = ''
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const res = await generateOutfit({
-        userInput: inputText,
-        city: cityInput.value || DEFAULT_CITY
-      })
-
+      const res = await generateOutfit({ userInput: inputText, city: cityInput.value || DEFAULT_CITY })
       if (res.code === 200 && res.data) {
         const record = res.data
         let plans = []
@@ -299,21 +311,26 @@ async function sendMessage() {
         const planNames = plans.map((p, i) => '方案' + (i + 1) + ': ' + (p.scheme_name || p.style || '')).join('、')
         messages.value.push({
           role: 'ai',
-          content: '已为您生成 ' + plans.length + ' 套穿搭方案 \n' + planNames + '\n点击右侧查看详细搭配解析',
+          content: '已为您生成' + plans.length + ' 套穿搭方案\n' + planNames + '\n点击右侧查看详细搭配解析',
           imageUrl: record.imageUrl || '',
           recordId: record.id,
           params: plans,
         })
-        await checkFavStatus(record.id)
+        await checkFavStatus(record.id).catch(() => {})
         await loadTodayCount()
+        generating.value = false
         return
+      } else {
+        lastError = res.msg || '未知错误'
       }
     } catch (e) {
-      if (attempt < 2) await new Promise(r => setTimeout(r, 2000))
-      else messages.value.push({ role: 'ai', content: '生成失败，请稍后重试' })
+      lastError = e.message || '网络错误'
+      console.error('Generate attempt ' + attempt + ' failed:', lastError)
     }
+    if (attempt < 2) await new Promise(r => setTimeout(r, 3000))
   }
   generating.value = false
+  messages.value.push({ role: 'ai', content: '生成失败：' + lastError + '，请稍后重试' })
   await nextTick()
   scrollToBottom()
 }
@@ -329,20 +346,12 @@ async function checkFavStatus(recordId) {
 }
 
 async function addFav(recordId) {
-  try {
-    await addFavorite(recordId)
-    ElMessage.success('已收藏')
-  } catch (e) {}
-}
-
-function downloadImage(url) {
-  if (url) window.open(url, '_blank')
+  try { await addFavorite(recordId); ElMessage.success('已收藏') } catch (e) {}
 }
 
 function regenerate(msg) {
   if (msg.params && msg.params.length) {
-    const style = msg.params[0]?.style || ''
-    userInput.value = '重新生成类似的穿搭，风格保持' + style
+    userInput.value = '重新生成类似的穿搭，风格保持' + (msg.params[0]?.style || '')
   } else {
     userInput.value = '重新生成一套穿搭'
   }
@@ -374,149 +383,39 @@ function scrollToBottom() {
 .msg-actions { margin-top: 8px; display: flex; gap: 4px; flex-wrap: wrap; }
 .card-title { font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
 
-/* ====== 右侧结果区 ====== */
 .result-card { min-height: 580px; }
 
-/* 空状态 */
-.outfit-empty {
-  min-height: 480px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.outfit-empty { min-height: 480px; display: flex; align-items: center; justify-content: center; }
 .empty-hint { text-align: center; color: #b0c2d0; }
 .empty-hint p { margin: 12px 0 4px; font-size: 15px; color: #8a9eae; }
 .empty-sub { font-size: 13px !important; color: #b8ccda !important; }
 
-/* 方案标签 */
-.scheme-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-.scheme-tab {
-  flex: 1;
-  padding: 10px 6px;
-  border-radius: 10px;
-  text-align: center;
-  cursor: pointer;
-  background: #f5f8fa;
-  border: 1.5px solid transparent;
-  transition: all 0.25s ease;
-}
-.scheme-tab:hover {
-  background: #eef3f7;
-}
-.scheme-tab.active {
-  background: #e8f2f8;
-  border-color: #8AB4D0;
-}
-.scheme-num {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #8a9eae;
-  margin-bottom: 2px;
-}
-.scheme-tab.active .scheme-num {
-  color: #6a8aaa;
-}
-.scheme-name {
-  display: block;
-  font-size: 13px;
-  color: #3d4f5e;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.scheme-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.scheme-tab { flex: 1; padding: 10px 6px; border-radius: 10px; text-align: center; cursor: pointer; background: #f5f8fa; border: 1.5px solid transparent; transition: all 0.25s ease; }
+.scheme-tab:hover { background: #eef3f7; }
+.scheme-tab.active { background: #e8f2f8; border-color: #8AB4D0; }
+.scheme-num { display: block; font-size: 12px; font-weight: 600; color: #8a9eae; margin-bottom: 2px; }
+.scheme-tab.active .scheme-num { color: #6a8aaa; }
+.scheme-name { display: block; font-size: 13px; color: #3d4f5e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* 穿搭图片 */
-.outfit-image-wrap {
-  margin-bottom: 16px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f5f8fa;
-}
-.outfit-image {
-  width: 100%;
-  min-height: 280px;
-  display: block;
-}
-.outfit-image-placeholder {
-  min-height: 240px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #b8ccda;
-  font-size: 14px;
-}
+.outfit-image-wrap { margin-bottom: 16px; border-radius: 12px; overflow: hidden; background: #f5f8fa; }
+.outfit-image { width: 100%; min-height: 280px; display: block; }
+.outfit-image-placeholder { min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #b8ccda; font-size: 14px; }
 
-/* 搭配详情 */
-.plan-detail {
-  text-align: left;
-}
-.plan-desc {
-  margin-bottom: 16px;
-}
-:deep(.plan-desc .el-descriptions__label) {
-  width: 70px;
-  color: #6a7e8e;
-}
-:deep(.plan-desc .el-descriptions__content) {
-  color: #3d4f5e;
-}
+.plan-detail { text-align: left; }
+.plan-desc { margin-bottom: 16px; }
+:deep(.plan-desc .el-descriptions__label) { width: 70px; color: #6a7e8e; }
+:deep(.plan-desc .el-descriptions__content) { color: #3d4f5e; }
 
-/* 搭配理由 */
-.match-reason {
-  margin-bottom: 16px;
-}
-.match-reason h4 {
-  font-size: 14px;
-  color: #3d4f5e;
-  margin: 0 0 6px;
-}
-.match-reason p {
-  font-size: 13px;
-  color: #6a7e8e;
-  line-height: 1.7;
-  margin: 0;
-  padding: 10px 14px;
-  background: #f8fafc;
-  border-radius: 8px;
-}
+.match-reason { margin-bottom: 16px; }
+.match-reason h4 { font-size: 14px; color: #3d4f5e; margin: 0 0 6px; }
+.match-reason p { font-size: 13px; color: #6a7e8e; line-height: 1.7; margin: 0; padding: 10px 14px; background: #f8fafc; border-radius: 8px; }
 
-/* 评分 */
-.score-section {
-  margin-bottom: 16px;
-}
-.score-section h4 {
-  font-size: 14px;
-  color: #3d4f5e;
-  margin: 0 0 10px;
-}
-.score-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.score-label {
-  width: 40px;
-  font-size: 12px;
-  color: #8a9eae;
-  text-align: right;
-  flex-shrink: 0;
-}
+.score-section { margin-bottom: 16px; }
+.score-section h4 { font-size: 14px; color: #3d4f5e; margin: 0 0 10px; }
+.score-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.score-label { width: 40px; font-size: 12px; color: #8a9eae; text-align: right; flex-shrink: 0; }
 
-/* 优化建议 */
-.optimize-advice {
-  margin-bottom: 4px;
-}
-.optimize-advice h4 {
-  font-size: 14px;
-  color: #3d4f5e;
-  margin: 0 0 8px;
-}
+.optimize-advice { margin-bottom: 4px; }
+.optimize-advice h4 { font-size: 14px; color: #3d4f5e; margin: 0 0 8px; }
 </style>
