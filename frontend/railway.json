@@ -1,0 +1,1 @@
+{"build":{"builder":"NIXPACKS"},"deploy":{"startCommand":"npx serve dist -l ${PORT:-3000} --single","healthcheckPath":"/","restartPolicyType":"ON_FAILURE"}}
