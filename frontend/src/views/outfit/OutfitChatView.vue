@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="outfit-container">
     <el-row :gutter="20">
       <!-- 左侧：对话区 -->
@@ -31,22 +31,18 @@
                   <el-button size="small" text type="primary" @click="addFav(msg.recordId)">
                     <el-icon><Star /></el-icon> {{ msg.fav ? '已收藏' : '收藏' }}
                   </el-button>
+<<<<<<< HEAD
                   <el-button size="small" text type="primary" :preview-src-list="[msg.imageUrl]"
                     preview-teleported>
+=======
+                  <el-button size="small" text type="primary" @click="previewImage(msg.imageUrl)">
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
                     <el-icon><Download /></el-icon> 下载
                   </el-button>
                   <el-button size="small" text type="warning" @click="regenerate(msg)">
                     <el-icon><Refresh /></el-icon> 重新生成
                   </el-button>
                 </div>
-              </div>
-            </div>
-            <div v-if="generating" class="msg-ai">
-              <div class="msg-avatar">
-                <el-avatar :size="36" icon="MagicStick" style="background:#409eff" />
-              </div>
-              <div class="msg-content">
-                <div class="msg-bubble"><el-icon class="is-loading"><Loading /></el-icon> AI正在思考穿搭方案...</div>
               </div>
             </div>
           </div>
@@ -89,6 +85,7 @@
         </el-card>
       </el-col>
 
+<<<<<<< HEAD
       <!-- 右侧：穿搭效果 + 方案解析 -->
       <el-col :span="10">
         <el-card shadow="never" class="result-card">
@@ -100,6 +97,14 @@
                   <el-icon><Link /></el-icon> 查看完整图片
                 </el-link>
               </div>
+=======
+      <!-- ====== 右侧：穿搭效果 + 方案解析 ====== -->
+      <el-col :span="10">
+        <el-card shadow="never" class="result-card">
+          <template #header>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="card-title"><el-icon><Picture /></el-icon> 穿搭效果</span>
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
             </div>
           </template>
 
@@ -114,8 +119,23 @@
 
           <!-- 有数据时 -->
           <div v-else class="outfit-result">
+<<<<<<< HEAD
             <!-- 季节搭配主标题 -->
             <div class="season-title">季节搭配</div>
+=======
+            <!-- 方案切换标签 -->
+            <div class="scheme-tabs">
+              <div
+                v-for="(s, i) in schemes"
+                :key="i"
+                :class="['scheme-tab', { active: activeScheme === i }]"
+                @click="activeScheme = i"
+              >
+                <span class="scheme-num">方案{{ i + 1 }}</span>
+                <span class="scheme-name">{{ s.scheme_name || s.style || '方案' + (i+1) }}</span>
+              </div>
+            </div>
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
 
             <!-- 当前方案内容 -->
             <div class="scheme-content">
@@ -123,6 +143,7 @@
               <div class="outfit-image-wrap">
                 <el-image
                   v-if="currentPlan.prompt"
+<<<<<<< HEAD
                   :src="currentPlan.image_url || '/api/placeholder/outfit?seed=' + Date.now()"
                   fit="contain"
                   class="outfit-image"
@@ -136,15 +157,24 @@
                     </div>
                   </template>
                 </el-image>
+=======
+                  :src="currentPlan.image_url || 'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(currentPlan.scheme_name || '穿搭效果')"
+                  fit="contain"
+                  class="outfit-image"
+                />
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
                 <div v-else class="outfit-image-placeholder">
                   <el-icon :size="36"><Picture /></el-icon>
                   <span>穿搭效果图</span>
                 </div>
+<<<<<<< HEAD
                 <div v-if="currentPlan.image_url" style="margin-top:6px;text-align:center">
                   <el-link type="primary" :underline="false" style="font-size:12px;cursor:pointer" @click="previewImage(currentPlan.image_url)">
                     查看原图
                   </el-link>
                 </div>
+=======
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
               </div>
 
               <!-- 方案解析 -->
@@ -227,6 +257,15 @@ const weatherLoading = ref(false)
 const DEFAULT_CITY = '北京'
 
 const currentPlan = computed(() => schemes.value[activeScheme.value] || {})
+<<<<<<< HEAD
+=======
+const imageSrc = computed(() => {
+  const url = currentPlan.value.image_url;
+  if (url) return url
+  const name = currentPlan.value.scheme_name || currentPlan.value.style || '穿搭效果';
+  return 'https://placehold.co/400x500/e8f0f6/8aaec8?text=' + encodeURIComponent(name)
+})
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
 
 const templates = [
   { label: '通勤穿搭', icon: 'Briefcase', text: '上班通勤穿搭，得体大方' },
@@ -238,9 +277,14 @@ const templates = [
 ]
 
 onMounted(async () => {
+<<<<<<< HEAD
+=======
+    try {
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
   cityInput.value = user.value?.city || DEFAULT_CITY
-  await loadWeather()
-  await loadTodayCount()
+  // await loadWeather()
+  // await loadTodayCount()
+    } catch (e) { console.error("[Init Error]", e) }
 })
 
 async function loadWeather() {
@@ -284,10 +328,20 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
+<<<<<<< HEAD
   let lastError = ''
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const res = await generateOutfit({ userInput: inputText, city: cityInput.value || DEFAULT_CITY })
+=======
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await generateOutfit({
+        userInput: inputText,
+        city: cityInput.value || DEFAULT_CITY
+      })
+
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
       if (res.code === 200 && res.data) {
         const record = res.data
         let plans = []
@@ -305,11 +359,16 @@ async function sendMessage() {
         const planNames = plans.map((p, i) => '方案' + (i + 1) + ': ' + (p.scheme_name || p.style || '')).join('、')
         messages.value.push({
           role: 'ai',
+<<<<<<< HEAD
           content: (record.imageUrl && !record.imageUrl.includes('placeholder')) ? '图片已生成' : '图片错误，请重新上传图片',
+=======
+          content: '已为您生成 ' + plans.length + ' 套穿搭方案 \n' + planNames + '\n点击右侧查看详细搭配解析',
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
           imageUrl: record.imageUrl || '',
           recordId: record.id,
           params: plans,
         })
+<<<<<<< HEAD
         await checkFavStatus(record.id).catch(() => {})
         await loadTodayCount()
         generating.value = false
@@ -322,6 +381,16 @@ async function sendMessage() {
       console.error('Generate attempt ' + attempt + ' failed:', lastError)
     }
     if (attempt < 2) await new Promise(r => setTimeout(r, 3000))
+=======
+        await checkFavStatus(record.id)
+        await loadTodayCount()
+        return
+      }
+    } catch (e) {
+      if (attempt < 2) await new Promise(r => setTimeout(r, 2000))
+      else messages.value.push({ role: 'ai', content: '生成失败，请稍后重试' })
+    }
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
   }
   generating.value = false
   messages.value.push({ role: 'ai', content: '生成失败：' + lastError + '，请稍后重试' })
@@ -345,7 +414,12 @@ async function addFav(recordId) {
 
 function regenerate(msg) {
   if (msg.params && msg.params.length) {
+<<<<<<< HEAD
     userInput.value = '重新生成类似的穿搭，风格保持' + (msg.params[0]?.style || '')
+=======
+    const style = msg.params[0]?.style || ''
+    userInput.value = '重新生成类似的穿搭，风格保持' + style
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
   } else {
     userInput.value = '重新生成一套穿搭'
   }
@@ -377,13 +451,27 @@ function scrollToBottom() {
 .msg-actions { margin-top: 8px; display: flex; gap: 4px; flex-wrap: wrap; }
 .card-title { font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
 
+<<<<<<< HEAD
 .result-card { min-height: 580px; }
 
 .outfit-empty { min-height: 480px; display: flex; align-items: center; justify-content: center; }
+=======
+/* ====== 右侧结果区 ====== */
+.result-card { min-height: 580px; }
+
+/* 空状态 */
+.outfit-empty {
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
 .empty-hint { text-align: center; color: #b0c2d0; }
 .empty-hint p { margin: 12px 0 4px; font-size: 15px; color: #8a9eae; }
 .empty-sub { font-size: 13px !important; color: #b8ccda !important; }
 
+<<<<<<< HEAD
 .season-title { font-size: 18px; font-weight: bold; color: #3d4f5e; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #8AB4D0; text-align: center; }
 .outfit-image-wrap { margin-bottom: 16px; border-radius: 12px; overflow: hidden; background: #f5f8fa; }
 .outfit-image { width: 100%; min-height: 280px; display: block; }
@@ -405,4 +493,137 @@ function scrollToBottom() {
 
 .optimize-advice { margin-bottom: 4px; }
 .optimize-advice h4 { font-size: 14px; color: #3d4f5e; margin: 0 0 8px; }
+=======
+/* 方案标签 */
+.scheme-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.scheme-tab {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  background: #f5f8fa;
+  border: 1.5px solid transparent;
+  transition: all 0.25s ease;
+}
+.scheme-tab:hover {
+  background: #eef3f7;
+}
+.scheme-tab.active {
+  background: #e8f2f8;
+  border-color: #8AB4D0;
+}
+.scheme-num {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8a9eae;
+  margin-bottom: 2px;
+}
+.scheme-tab.active .scheme-num {
+  color: #6a8aaa;
+}
+.scheme-name {
+  display: block;
+  font-size: 13px;
+  color: #3d4f5e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 穿搭图片 */
+.outfit-image-wrap {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f8fa;
+}
+.outfit-image {
+  width: 100%;
+  min-height: 280px;
+  display: block;
+}
+.outfit-image-placeholder {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #b8ccda;
+  font-size: 14px;
+}
+
+/* 搭配详情 */
+.plan-detail {
+  text-align: left;
+}
+.plan-desc {
+  margin-bottom: 16px;
+}
+:deep(.plan-desc .el-descriptions__label) {
+  width: 70px;
+  color: #6a7e8e;
+}
+:deep(.plan-desc .el-descriptions__content) {
+  color: #3d4f5e;
+}
+
+/* 搭配理由 */
+.match-reason {
+  margin-bottom: 16px;
+}
+.match-reason h4 {
+  font-size: 14px;
+  color: #3d4f5e;
+  margin: 0 0 6px;
+}
+.match-reason p {
+  font-size: 13px;
+  color: #6a7e8e;
+  line-height: 1.7;
+  margin: 0;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+/* 评分 */
+.score-section {
+  margin-bottom: 16px;
+}
+.score-section h4 {
+  font-size: 14px;
+  color: #3d4f5e;
+  margin: 0 0 10px;
+}
+.score-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.score-label {
+  width: 40px;
+  font-size: 12px;
+  color: #8a9eae;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 优化建议 */
+.optimize-advice {
+  margin-bottom: 4px;
+}
+.optimize-advice h4 {
+  font-size: 14px;
+  color: #3d4f5e;
+  margin: 0 0 8px;
+}
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
 </style>
