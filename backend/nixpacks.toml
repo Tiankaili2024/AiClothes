@@ -1,4 +1,4 @@
-﻿# nixpacks.toml - Backend (Spring Boot + Maven + JDK 17)
+# nixpacks.toml - Backend (Spring Boot + Maven + JDK 17)
 [phases.setup]
 cmds = [
   "apt-get update && apt-get install -y maven"

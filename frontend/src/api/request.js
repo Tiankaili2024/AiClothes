@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { getToken, removeToken, removeUser } from '../utils/auth'
 import router from '../router'

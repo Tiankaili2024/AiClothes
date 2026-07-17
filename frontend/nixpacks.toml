@@ -1,4 +1,4 @@
-﻿# nixpacks.toml - Frontend (Vue + Vite)
+# nixpacks.toml - Frontend (Vue + Vite)
 [phases.setup]
 nixPkgs = ["nodejs", "pnpm"]
 
