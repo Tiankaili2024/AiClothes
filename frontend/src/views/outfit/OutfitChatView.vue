@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="outfit-container">
     <el-row :gutter="20">
       <!-- 左侧：对话区 -->
@@ -114,18 +114,8 @@
 
           <!-- 有数据时 -->
           <div v-else class="outfit-result">
-            <!-- 方案切换标签 -->
-            <div class="scheme-tabs">
-              <div
-                v-for="(s, i) in schemes"
-                :key="i"
-                :class="['scheme-tab', { active: activeScheme === i }]"
-                @click="activeScheme = i"
-              >
-                <span class="scheme-num">方案{{ i + 1 }}</span>
-                <span class="scheme-name">{{ s.scheme_name || s.style || '方案' + (i+1) }}</span>
-              </div>
-            </div>
+            <!-- 季节搭配主标题 -->
+            <div class="season-title">季节搭配</div>
 
             <!-- 当前方案内容 -->
             <div class="scheme-content">
@@ -315,7 +305,7 @@ async function sendMessage() {
         const planNames = plans.map((p, i) => '方案' + (i + 1) + ': ' + (p.scheme_name || p.style || '')).join('、')
         messages.value.push({
           role: 'ai',
-          content: '已为您生成' + plans.length + ' 套穿搭方案\n' + planNames + '\n点击右侧查看详细搭配解析',
+          content: (record.imageUrl && !record.imageUrl.includes('placeholder')) ? '图片已生成' : '图片错误，请重新上传图片',
           imageUrl: record.imageUrl || '',
           recordId: record.id,
           params: plans,
@@ -394,14 +384,7 @@ function scrollToBottom() {
 .empty-hint p { margin: 12px 0 4px; font-size: 15px; color: #8a9eae; }
 .empty-sub { font-size: 13px !important; color: #b8ccda !important; }
 
-.scheme-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
-.scheme-tab { flex: 1; padding: 10px 6px; border-radius: 10px; text-align: center; cursor: pointer; background: #f5f8fa; border: 1.5px solid transparent; transition: all 0.25s ease; }
-.scheme-tab:hover { background: #eef3f7; }
-.scheme-tab.active { background: #e8f2f8; border-color: #8AB4D0; }
-.scheme-num { display: block; font-size: 12px; font-weight: 600; color: #8a9eae; margin-bottom: 2px; }
-.scheme-tab.active .scheme-num { color: #6a8aaa; }
-.scheme-name { display: block; font-size: 13px; color: #3d4f5e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
+.season-title { font-size: 18px; font-weight: bold; color: #3d4f5e; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #8AB4D0; text-align: center; }
 .outfit-image-wrap { margin-bottom: 16px; border-radius: 12px; overflow: hidden; background: #f5f8fa; }
 .outfit-image { width: 100%; min-height: 280px; display: block; }
 .outfit-image-placeholder { min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #b8ccda; font-size: 14px; }

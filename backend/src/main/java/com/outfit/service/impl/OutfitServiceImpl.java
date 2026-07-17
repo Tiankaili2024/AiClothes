@@ -69,7 +69,7 @@ public class OutfitServiceImpl implements OutfitService {
             r.setStatus(1);
 
             if (i == 0) {
-                String prompt = buildPrompt(jsonResult, 0);
+                String prompt = buildPrompt(user, jsonResult, 0);
                 r.setPrompt(prompt);
                 try {
                     r.setImageUrl(cozeImageService.generateOutfitImage(prompt, photoUrl));
@@ -86,12 +86,13 @@ public class OutfitServiceImpl implements OutfitService {
         return firstRecord;
     }
 
-    private String buildPrompt(String json, int idx) {
+    private String buildPrompt(User user, String json, int idx) {
         try {
             List<Map<String, Object>> plans = new ObjectMapper().readValue(json, List.class);
             if (plans != null && idx < plans.size()) {
                 Map<String, Object> p = plans.get(idx);
-                StringBuilder sb = new StringBuilder("A fashion model wearing ");
+                                String gender = (user.getGender() != null && user.getGender().contains("女")) ? "female" : "male";
+                StringBuilder sb = new StringBuilder("A " + gender + " model wearing ");
                 if (p.get("top") != null) sb.append(p.get("top")).append(", ");
                 if (p.get("bottom") != null) sb.append(p.get("bottom")).append(", ");
                 if (p.get("shoes") != null) sb.append(p.get("shoes")).append(", ");
@@ -101,7 +102,7 @@ public class OutfitServiceImpl implements OutfitService {
                 return sb.toString();
             }
         } catch (Exception e) { log.warn("Prompt build failed: {}", e.getMessage()); }
-        return "A fashion model wearing stylish clothes, full body shot, high quality.";
+        return "A male model wearing stylish clothes, full body shot, high quality.";
     }
 
     @Override public OutfitRecord getRecordDetail(Long recordId, Long userId) {
