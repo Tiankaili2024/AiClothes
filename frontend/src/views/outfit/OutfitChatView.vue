@@ -19,8 +19,9 @@
               <div class="msg-content">
                 <div class="msg-bubble">{{ msg.content }}</div>
                 <div v-if="msg.imageUrl" class="msg-image">
-                  <el-image :src="msg.imageUrl" fit="contain" style="width:100%;max-height:400px;border-radius:8px"
-                    @click="previewImage(msg.imageUrl)">
+                  <el-image :src="msg.imageUrl" fit="contain" style="width:100%;max-height:400px;border-radius:8px;cursor:pointer"
+                    :preview-src-list="[msg.imageUrl]"
+                    preview-teleported>
                     <template #error>
                       <div style="padding:20px;text-align:center;color:#909399">图片加载中...</div>
                     </template>
@@ -30,7 +31,8 @@
                   <el-button size="small" text type="primary" @click="addFav(msg.recordId)">
                     <el-icon><Star /></el-icon> {{ msg.fav ? '已收藏' : '收藏' }}
                   </el-button>
-                  <el-button size="small" text type="primary" @click="previewImage(msg.imageUrl)">
+                  <el-button size="small" text type="primary" :preview-src-list="[msg.imageUrl]"
+                    preview-teleported>
                     <el-icon><Download /></el-icon> 下载
                   </el-button>
                   <el-button size="small" text type="warning" @click="regenerate(msg)">
@@ -94,8 +96,8 @@
             <div>
               <span class="card-title"><el-icon><Picture /></el-icon> 穿搭效果</span>
               <div v-if="currentPlan.image_url" style="margin-top:4px">
-                <el-link :href="currentPlan.image_url" target="_blank" type="primary" :underline="false" style="font-size:11px">
-                  <el-icon><Link /></el-icon> {{ currentPlan.image_url.substring(0,50) }}...
+                <el-link type="primary" :underline="false" style="font-size:11px;cursor:pointer" @click="previewImage(currentPlan.image_url)">
+                  <el-icon><Link /></el-icon> 查看完整图片
                 </el-link>
               </div>
             </div>
@@ -134,11 +136,13 @@
                   :src="currentPlan.image_url || '/api/placeholder/outfit?seed=' + Date.now()"
                   fit="contain"
                   class="outfit-image"
+                  :preview-src-list="currentPlan.image_url ? [currentPlan.image_url] : []"
+                  preview-teleported
                 >
                   <template #error>
                     <div class="outfit-image-placeholder">
                       <el-icon :size="36"><Picture /></el-icon>
-                      <span>图片加载失败</span>
+                      <span>图片加载失败，点击重试</span>
                     </div>
                   </template>
                 </el-image>
@@ -147,7 +151,7 @@
                   <span>穿搭效果图</span>
                 </div>
                 <div v-if="currentPlan.image_url" style="margin-top:6px;text-align:center">
-                  <el-link :href="currentPlan.image_url" target="_blank" type="primary" :underline="false" style="font-size:12px">
+                  <el-link type="primary" :underline="false" style="font-size:12px;cursor:pointer" @click="previewImage(currentPlan.image_url)">
                     查看原图
                   </el-link>
                 </div>
