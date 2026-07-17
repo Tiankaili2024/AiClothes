@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 8080
 spring:
   autoconfigure:
@@ -55,5 +55,5 @@ app:
   upload-dir: uploads/avatar
 coze:
   api-url: https://api.coze.cn/v1/workflow/run
-  api-key: pat_bEv2FuEN9pauUFd1KepdjwaENvDKw0EGwju9bXGaA0UIGJ26xc1GEZa4P5Q1JJKq
-  workflow-id: 7657770859754536970
+  api-key: pat_fyGbQE1YnJ7YyGWWUGWA84pewm2IfcC0HXgeuz9xEWyrtLLk3gJcdt8PR6SxnkCO
+  workflow-id: 7663396885537783843

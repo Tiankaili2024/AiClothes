@@ -9,8 +9,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,8 +57,37 @@ public class CozeImageService {
         headers.set("Authorization", "Bearer " + apiKey);
 
         Map<String, Object> params = new HashMap<>();
+
+        // Upload local photo to Coze file API, then pass file_id to workflow
+        Object photoParam = "";
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            try {
+                String resolvedPath = photoUrl;
+                if (photoUrl.startsWith("http://localhost:8080")) {
+                    String userDir = System.getProperty("user.dir");
+                    resolvedPath = userDir + photoUrl.substring("http://localhost:8080".length());
+                } else if (photoUrl.startsWith("/")) {
+                    String userDir = System.getProperty("user.dir");
+                    resolvedPath = userDir + photoUrl;
+                }
+
+                String fileId = uploadFileToCoze(resolvedPath);
+                if (fileId != null) {
+                    // Coze image parameter expects format: {"file_id": "xxx"}
+                    Map<String, String> photoObj = new HashMap<>();
+                    photoObj.put("file_id", fileId);
+                    photoParam = photoObj;
+                    log.info("Coze file_id for photo: {}", fileId);
+                } else {
+                    log.warn("Failed to upload photo to Coze, sending empty photo");
+                }
+            } catch (Exception e) {
+                log.warn("Failed to upload photo to Coze: {}", e.getMessage());
+            }
+        }
+
         params.put("user_prompt", prompt);
-        params.put("photo", photoUrl != null && !photoUrl.isEmpty() ? photoUrl : "");
+        params.put("photo", photoParam);
 
         Map<String, Object> body = new HashMap<>();
         body.put("workflow_id", workflowId);
@@ -98,18 +129,15 @@ public class CozeImageService {
 
         if (cozeImageUrl == null) throw new RuntimeException("Coze failed to generate image");
 
-        // Download and save locally
         return saveImageLocally(cozeImageUrl);
     }
 
     private String saveImageLocally(String cozeUrl) {
         try {
-            // Ensure directory exists
             String userDir = System.getProperty("user.dir");
             Path dirPath = Paths.get(userDir, generatedDir);
             Files.createDirectories(dirPath);
 
-            // Generate unique filename
             String ext = "png";
             if (cozeUrl.contains(".")) {
                 String query = cozeUrl.contains("?") ? cozeUrl.substring(0, cozeUrl.indexOf("?")) : cozeUrl;
@@ -122,7 +150,6 @@ public class CozeImageService {
             String filename = UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + "." + ext;
             Path targetPath = dirPath.resolve(filename);
 
-            // Download the image
             log.info("Downloading Coze image from {} to {}", cozeUrl, targetPath);
             try (InputStream in = new URL(cozeUrl).openStream()) {
                 Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -131,13 +158,11 @@ public class CozeImageService {
             long fileSize = Files.size(targetPath);
             log.info("Saved locally: {} ({} bytes)", targetPath, fileSize);
 
-            // Return the accessible URL path
             String localUrl = "/uploads/generated/" + filename;
             log.info("Local image URL: {}", localUrl);
             return localUrl;
         } catch (IOException e) {
             log.error("Failed to save Coze image locally: {}", e.getMessage());
-            // Fallback to original URL
             return cozeUrl;
         }
     }
@@ -177,5 +202,61 @@ public class CozeImageService {
             return raw.substring(idx, end).trim();
         }
         throw new RuntimeException("No image URL in: " + raw.substring(0, Math.min(200, raw.length())));
+    }
+
+    private String uploadFileToCoze(String filePath) {
+        String uploadUrl = "https://api.coze.cn/v1/files/upload";
+        String boundary = "----FormBoundary" + UUID.randomUUID().toString().replace("-", "");
+
+        try {
+            Path path = Paths.get(filePath);
+            if (!Files.exists(path)) {
+                log.warn("Photo file not found: {}", filePath);
+                return null;
+            }
+
+            byte[] fileBytes = Files.readAllBytes(path);
+            String fileName = path.getFileName().toString();
+            String contentType = Files.probeContentType(path);
+            if (contentType == null) contentType = "image/jpeg";
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            String header = "--" + boundary + "\r\n"
+                    + "Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"\r\n"
+                    + "Content-Type: " + contentType + "\r\n\r\n";
+            baos.write(header.getBytes("UTF-8"));
+            baos.write(fileBytes);
+            baos.write(("\r\n--" + boundary + "\r\n").getBytes("UTF-8"));
+            String purposePart = "Content-Disposition: form-data; name=\"purpose\"\r\n\r\nworkflow\r\n";
+            baos.write(purposePart.getBytes("UTF-8"));
+            baos.write(("--" + boundary + "--\r\n").getBytes("UTF-8"));
+
+            byte[] bodyBytes = baos.toByteArray();
+
+            HttpURLConnection conn = (HttpURLConnection) new URL(uploadUrl).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            conn.setDoOutput(true);
+            conn.getOutputStream().write(bodyBytes);
+
+            int responseCode = conn.getResponseCode();
+            InputStream responseStream = (responseCode >= 200 && responseCode < 300)
+                    ? conn.getInputStream() : conn.getErrorStream();
+            String responseBody = new String(responseStream.readAllBytes(), "UTF-8");
+
+            log.info("Coze file upload response code={} body={}", responseCode, responseBody);
+
+            Map<String, Object> response = objectMapper.readValue(responseBody, Map.class);
+            if (response.get("code") != null && (Integer) response.get("code") == 0) {
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+                return (String) data.get("id");
+            }
+            log.warn("Coze upload failed: {}", responseBody);
+            return null;
+        } catch (Exception e) {
+            log.warn("Coze upload exception: {}", e.getMessage());
+            return null;
+        }
     }
 }
