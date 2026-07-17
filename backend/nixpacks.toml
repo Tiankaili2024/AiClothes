@@ -1,0 +1,16 @@
+﻿# nixpacks.toml - Backend (Spring Boot + Maven + JDK 17)
+[phases.setup]
+cmds = [
+  "apt-get update && apt-get install -y maven"
+]
+
+[phases.build]
+cmds = [
+  "mvn clean package -DskipTests"
+]
+
+[start]
+cmd = "java -jar target/ai-outfit-system-1.0.0.jar --server.port=${PORT:-8080}"
+
+[variables]
+JAVA_HOME = "/nix/var/nix/profiles/default"

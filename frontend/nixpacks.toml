@@ -1,0 +1,15 @@
+﻿# nixpacks.toml - Frontend (Vue + Vite)
+[phases.setup]
+nixPkgs = ["nodejs", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile || pnpm install"]
+
+[phases.build]
+cmds = ["pnpm run build"]
+
+[start]
+cmd = "npx serve dist -l ${PORT:-3000} --single"
+
+[variables]
+NODE_ENV = "production"
