@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <el-container class="layout-container">
     <el-header class="layout-header">
       <div class="header-left">
@@ -25,7 +25,11 @@
     </el-header>
     <el-container style="height: calc(100vh - 60px)">
       <el-aside width="220px" class="layout-aside">
+<<<<<<< HEAD
                 <el-menu :default-active="route.path" router background-color="#1d1e1f" text-color="#bfcbd9" active-text-color="#409eff">
+=======
+                <el-menu :default-active="route.path" router background-color="#b4c9e3" text-color="#303133" active-text-color="#fff">
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
           <el-menu-item index="/outfit">
             <el-icon><MagicStick /></el-icon><span>AI穿搭</span>
           </el-menu-item>
@@ -82,14 +86,19 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
-const user = ref(getUser() || { username: '用户', role: 0 })
+const user = ref(getUser() || { username: '\u7528\u6237', role: 0 })
 const pwdDialogVisible = ref(false)
 const pwdLoading = ref(false)
 const pwdFormRef = ref(null)
 const pwdForm = ref({ oldPassword: '', newPassword: '' })
 const pwdRules = {
+<<<<<<< HEAD
   oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
   newPassword: [{ required: true, message: '请输入新密码', trigger: 'blur' }, { min: 6, max: 20, message: '长度6-20位', trigger: 'blur' }],
+=======
+  oldPassword: [{ required: true, message: '\u8bf7\u8f93\u5165\u539f\u5bc6\u7801', trigger: 'blur' }],
+  newPassword: [{ required: true, message: '\u8bf7\u8f93\u5165\u65b0\u5bc6\u7801', trigger: 'blur' }, { min: 6, max: 20, message: '\u957f\u5ea66-20\u4f4d', trigger: 'blur' }],
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
 }
 
 onMounted(async () => {
@@ -113,7 +122,11 @@ async function submitPassword() {
   pwdLoading.value = true
   try {
     await updatePassword({ oldPassword: pwdForm.value.oldPassword, newPassword: pwdForm.value.newPassword })
+<<<<<<< HEAD
     ElMessage.success('密码修改成功')
+=======
+    ElMessage.success('\u5bc6\u7801\u4fee\u6539\u6210\u529f')
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
     pwdDialogVisible.value = false
     pwdForm.value = { oldPassword: '', newPassword: '' }
   } catch(e) {}
@@ -121,7 +134,7 @@ async function submitPassword() {
 }
 
 function handleLogout() {
-  ElMessageBox.confirm('确认退出登录？', '提示').then(() => { removeToken(); removeUser(); router.push('/login') }).catch(() => {})
+  ElMessageBox.confirm('\u786e\u8ba4\u9000\u51fa\u767b\u5f55\uff1f', '\u63d0\u793a').then(() => { removeToken(); removeUser(); router.push('/login') }).catch(() => {})
 }
 </script>
 <style scoped>
@@ -131,7 +144,39 @@ function handleLogout() {
 .logo-text { font-size: 20px; font-weight: bold; color: #303133; }
 .header-right { display: flex; align-items: center; }
 .user-info { display: flex; align-items: center; cursor: pointer; }
+<<<<<<< HEAD
 .layout-aside { background-color: #1d1e1f; overflow-y: auto; }
 .layout-main { background-color: #f5f7fa; padding: 20px; }
 .el-menu { border-right: none; }
+=======
+.layout-aside { background-color: #b4c9e3; overflow-y: auto; }
+.layout-main { background-color: #f9f7f3; padding: 20px; }
+
+/* 侧边栏 el-menu 深度穿透（scoped 隔离，不污染其他页面） */
+.layout-aside :deep(.el-menu),
+.layout-aside :deep(.el-menu--vertical) {
+  border-right: none !important;
+}
+.layout-aside :deep(.el-menu-item) {
+  background-color: #b4c9e3 !important;
+  color: #303133 !important;
+}
+.layout-aside :deep(.el-menu-item:hover) {
+  background-color: #a4bdd8 !important;
+}
+.layout-aside :deep(.el-menu-item.is-active) {
+  background-color: #93aed1 !important;
+  color: #fff !important;
+}
+.layout-aside :deep(.el-menu-item .el-icon) {
+  color: #303133 !important;
+}
+.layout-aside :deep(.el-sub-menu__title) {
+  background-color: #b4c9e3 !important;
+  color: #303133 !important;
+}
+.layout-aside :deep(.el-sub-menu__title:hover) {
+  background-color: #a4bdd8 !important;
+}
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc
 </style>

@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import com.outfit.mapper.SystemConfigMapper;
 import com.outfit.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -13,7 +14,12 @@ import java.util.*;
 public class WeatherServiceImpl implements WeatherService {
     @Autowired private SystemConfigMapper configMapper;
 
-    // 北方城市（秦岭-淮河以北，含东北、华北、西北）
+    @Value("${ai.weather.api-key:}")
+    private String weatherApiKey;
+
+    @Value("${ai.weather.api-url:}")
+    private String weatherApiUrl;
+
     private static final Set<String> NORTH_CITIES = new HashSet<>(Arrays.asList(
         "北京","天津","石家庄","唐山","秦皇岛","邯郸","邢台","保定","张家口","承德","沧州","廊坊",
         "太原","大同","阳泉","长治","晋城","朔州","晋中","运城","忻州","临汾","吕梁",
@@ -36,6 +42,8 @@ public class WeatherServiceImpl implements WeatherService {
     public Map<String, Object> getWeather(String city) {
         String apiKey = configMapper.getValueByKey("weather_api_key");
         String apiUrl = configMapper.getValueByKey("weather_api_url");
+        if (apiKey == null || apiKey.isEmpty()) apiKey = weatherApiKey;
+        if (apiUrl == null || apiUrl.isEmpty()) apiUrl = weatherApiUrl;
         Map<String, Object> weather;
         if (apiKey == null || apiKey.isEmpty()) {
             weather = getDefaultWeather();
@@ -58,7 +66,6 @@ public class WeatherServiceImpl implements WeatherService {
                 weather = getDefaultWeather();
             }
         }
-        // 补充季节和南北判定
         int temp = Integer.parseInt((String) weather.get("temperature"));
         weather.put("season", getSeason(temp));
         weather.put("regionType", isNorthCity((String) weather.get("city")) ? "北方" : "南方");
@@ -68,7 +75,6 @@ public class WeatherServiceImpl implements WeatherService {
     @Override
     public boolean isNorthCity(String city) {
         if (city == null || city.isEmpty()) return true;
-        // 前缀匹配支持"北京"匹配"北京市"、"北京朝阳"等
         for (String nc : NORTH_CITIES) {
             if (city.contains(nc)) return true;
         }

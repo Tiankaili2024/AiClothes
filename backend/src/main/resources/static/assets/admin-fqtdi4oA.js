@@ -1,0 +1,1 @@
+import{r as n}from"./request-veiiIhXT.js";function e(){return n.get("/admin/dashboard")}function u(t,r,a){return n.get("/admin/users",{params:{page:t,size:r,keyword:a}})}function i(t,r){return n.put("/admin/user/status/"+t,{status:r})}function o(){return n.get("/admin/config")}function g(t){return n.put("/admin/config",t)}export{o as a,e as g,u as l,i as t,g as u};

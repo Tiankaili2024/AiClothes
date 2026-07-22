@@ -21,6 +21,7 @@ Thumbs.db
 node_modules/
 .pnp
 .pnp.js
+<<<<<<< HEAD
 # H2数据库文件，不纳入Git版本管理
 *.mv.db
 *.trace.db
@@ -28,3 +29,5 @@ backend/data/*.mv.db
 
 
 
+=======
+>>>>>>> 72c987a9749037dd86db97d59a877b31bb03efbc

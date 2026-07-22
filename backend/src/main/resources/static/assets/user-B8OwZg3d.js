@@ -1,0 +1,1 @@
+import{r as e}from"./request-CCep_9_-.js";function u(){return e.get("/user/info")}function s(r){return e.put("/user/profile",r)}function o(r){return e.put("/user/password",r)}export{s as a,u as g,o as u};

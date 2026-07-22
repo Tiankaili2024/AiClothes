@@ -1,0 +1,1 @@
+import{r as e}from"./request-iGMuvx5P.js";function n(t){return e.post("/outfit/generate",t)}function u(t,r){return e.get("/outfit/records",{params:{page:t,size:r}})}function a(t){return e.delete("/outfit/delete/"+t)}function c(){return e.delete("/outfit/clear")}function f(){return e.get("/outfit/today-count")}export{f as a,u as b,c,a as d,n as g};

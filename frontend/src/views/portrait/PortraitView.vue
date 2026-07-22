@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="portrait-container">
     <el-row :gutter="16" style="margin-bottom:16px">
       <el-col :span="6">
@@ -26,8 +26,10 @@
       <el-col :span="12">
         <el-card shadow="never">
           <template #header>我的风格分布</template>
-          <v-chart :option="styleOption" style="height:350px" autoresize v-if="hasData" />
-          <el-empty v-else description="暂无数据，请先生成穿搭方案" />
+          <div class="chart-wrap">
+            <v-chart :option="styleOption" autoresize v-if="hasData" />
+            <el-empty v-else description="暂无风格数据，请先生成穿搭方案" />
+          </div>
         </el-card>
       </el-col>
       <el-col :span="12">
@@ -54,25 +56,38 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 use([CanvasRenderer, PieChart, TitleComponent, TooltipComponent, LegendComponent])
+
 const portrait = ref({})
 const hasData = ref(false)
+
 onMounted(async () => {
   try {
     const res = await request.get('/outfit/user-portrait')
     if (res.code === 200 && res.data) {
       portrait.value = res.data
-      hasData.value = true
+      const dist = res.data.styleDistribution
+      hasData.value = Array.isArray(dist) && dist.length > 0
     }
-  } catch(e) {}
+  } catch(e) {
+    hasData.value = false
+  }
 })
-const styleOption = computed(() => ({
-  tooltip: { trigger: 'item' },
-  legend: { bottom: '5%' },
-  series: [{ type: 'pie', radius: ['30%', '60%'],
-    data: (portrait.value.styleDistribution || []).map(d => ({ name: d.style || d.style_tags, value: parseInt(d.count) || 0 })),
-    emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.3)' } },
-  }],
-}))
+
+const styleOption = computed(() => {
+  const dist = portrait.value.styleDistribution || []
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { bottom: '5%' },
+    series: [{
+      type: 'pie',
+      radius: ['30%', '60%'],
+      avoidLabelOverlap: true,
+      label: { show: true, formatter: '{b}\n{d}%' },
+      data: dist.map(d => ({ name: d.style || d.style_tags || '未知', value: parseInt(d.count) || 0 })),
+      emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.3)' } },
+    }],
+  }
+})
 </script>
 <style scoped>
 .portrait-container { max-width: 1200px; margin: 0 auto; }
@@ -80,4 +95,5 @@ const styleOption = computed(() => ({
 .stat-value { font-size: 36px; font-weight: bold; color: #303133; }
 .stat-label { font-size: 14px; color: #909399; margin-top: 5px; }
 .rec-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; }
+.chart-wrap { width: 100%; height: 320px; }
 </style>

@@ -1,0 +1,1 @@
+import{r}from"./request-WWsZuGHl.js";function o(e){return r.post("/favorite/add/"+e)}function i(e){return r.delete("/favorite/remove/"+e)}function n(e,t){return r.get("/favorite/list",{params:{page:e,size:t}})}function s(e){return r.get("/favorite/check/"+e)}export{o as a,s as c,n as g,i as r};
